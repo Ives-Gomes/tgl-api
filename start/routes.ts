@@ -15,5 +15,5 @@ Route.get('test_db_connections', async ({ response }: HttpContextContract) => {
 })
 
 Route.get('/', async () => {
-  return { hello: 'world' }
+  return { message: 'Welcome to TGL Application!' }
 })
