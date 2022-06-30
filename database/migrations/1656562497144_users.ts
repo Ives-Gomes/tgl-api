@@ -11,7 +11,7 @@ export default class extends BaseSchema {
       table.string('name', 50).notNullable()
       table.string('cpf', 14).unique().notNullable()
       table.string('email', 50).unique().notNullable()
-      table.string('password', 50).notNullable()
+      table.string('password', 250).notNullable()
 
       table.timestamp('created_at', { useTz: true })
       table.timestamp('updated_at', { useTz: true })
