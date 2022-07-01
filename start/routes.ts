@@ -17,3 +17,9 @@ Route.get('test_db_connections', async ({ response }: HttpContextContract) => {
 Route.get('/', async () => {
   return { message: 'Welcome to TGL Application!' }
 })
+
+Route.group(() => {
+  Route.post('login', 'AuthController.login')
+
+  Route.post('users/', 'UsersController.store')
+}).prefix('v1/api')
