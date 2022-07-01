@@ -23,3 +23,9 @@ Route.group(() => {
 
   Route.post('users/', 'UsersController.store')
 }).prefix('v1/api')
+
+Route.group(() => {
+  Route.resource('users/', 'UsersController').except(['store'])
+})
+  .prefix('v1/api')
+  .middleware(['auth', 'is:admin'])
