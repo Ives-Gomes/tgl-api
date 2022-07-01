@@ -1,9 +1,12 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Database from '@ioc:Adonis/Lucid/Database'
 
 import User from 'App/Models/User'
 import Role from 'App/Models/Role'
-import Database from '@ioc:Adonis/Lucid/Database'
 import Address from 'App/Models/Address'
+
+import StoreValidator from 'App/Validators/User/StoreValidator'
+import UpdateValidator from 'App/Validators/User/UpdateValidator'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -15,6 +18,8 @@ export default class UsersController {
   }
 
   public async store({ request, response }: HttpContextContract) {
+    await request.validate(StoreValidator)
+
     const bodyUser = request.only(['name', 'cpf', 'email', 'password'])
     const bodyAddress = request.only([
       'zipCode',
@@ -75,7 +80,7 @@ export default class UsersController {
   }
 
   public async update({ request, response, params }: HttpContextContract) {
-    console.log(params.id)
+    await request.validate(UpdateValidator)
 
     const userSecureId = params.id
     const bodyUser = request.only(['name', 'cpf', 'email', 'password'])
