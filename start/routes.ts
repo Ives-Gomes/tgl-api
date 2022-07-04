@@ -26,12 +26,14 @@ Route.group(() => {
 
 Route.group(() => {
   Route.resource('users/', 'UsersController').except(['store', 'index', 'destroy'])
+  Route.resource('games/', 'GamesController').except(['store', 'update', 'index', 'destroy'])
 })
   .prefix('v1/api')
   .middleware(['auth', 'is:client'])
 
 Route.group(() => {
   Route.resource('users/', 'UsersController').only(['index', 'destroy'])
+  Route.resource('games/', 'GamesController').only(['store', 'update', 'index', 'destroy'])
 })
   .prefix('v1/api')
   .middleware(['auth', 'is:admin'])
