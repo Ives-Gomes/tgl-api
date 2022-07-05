@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 import Game from 'App/Models/Game'
+import Cart from 'App/Models/Cart'
 
 import StoreValidator from 'App/Validators/Game/StoreValidator'
 import UpdateValidator from 'App/Validators/Game/UpdateValidator'
@@ -11,15 +12,23 @@ export default class GamesController {
     const { page, perPage, noPaginate, ...inputs } = request.qs()
 
     try {
+      let games
+
+      const minCartValue = await (
+        await Cart.query().select('min_cart_value').firstOrFail()
+      ).minCartValue
+
       if (noPaginate) {
-        return Game.query().filter(inputs)
+        games = await Game.query().filter(inputs)
+
+        return response.ok({ min_cart_value: minCartValue, types: games })
       }
 
-      const games = await Game.query()
+      games = await Game.query()
         .filter(inputs)
         .paginate(page || 1, perPage || 10)
 
-      return response.ok(games)
+      return response.ok({ min_cart_value: minCartValue, types: games })
     } catch (error) {
       return response.badRequest({ message: 'Error in games list', originalError: error.message })
     }

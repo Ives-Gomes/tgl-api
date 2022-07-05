@@ -37,39 +37,45 @@ export default class GamesController {
     }
   }
 
-  public async store({ request, response }: HttpContextContract) {
+  public async store({ request, response, auth }: HttpContextContract) {
     await request.validate(StoreValidator)
 
-    const bodyBet = request.all()
+    const userAuthenticated = auth.user?.id
 
-    let betCreated
+    if (userAuthenticated) {
+      const bodyBet = request.all()
 
-    const trx = await Database.beginGlobalTransaction()
+      let betCreated
 
-    try {
-      betCreated = await Bet.create(bodyBet, trx)
-    } catch (error) {
-      trx.rollback()
+      const trx = await Database.beginGlobalTransaction()
 
-      return response.badRequest({ message: 'Error in create bet', originalError: error.message })
+      try {
+        betCreated = await Bet.create(bodyBet, trx)
+      } catch (error) {
+        trx.rollback()
+
+        return response.badRequest({ message: 'Error in create bet', originalError: error.message })
+      }
+
+      let betFind
+
+      try {
+        betFind = await Bet.query().where('id', betCreated.id).preload('user').preload('game')
+      } catch (error) {
+        trx.rollback()
+
+        return response.badRequest({
+          message: 'Error in find bet',
+          originalError: error.message,
+        })
+      }
+
+      trx.commit()
+
+      return response.ok(betFind)
+    } else {
+      return response.unauthorized({ message: 'You need to be logged' })
     }
-
-    let betFind
-
-    try {
-      betFind = await Bet.query().where('id', betCreated.id).preload('user').preload('game')
-    } catch (error) {
-      trx.rollback()
-
-      return response.badRequest({
-        message: 'Error in find bet',
-        originalError: error.message,
-      })
-    }
-
-    trx.commit()
-
-    return response.ok(betFind)
   }
 
   public async update({ request, response, params }: HttpContextContract) {

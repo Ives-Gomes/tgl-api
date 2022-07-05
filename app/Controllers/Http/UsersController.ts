@@ -44,6 +44,11 @@ export default class UsersController {
         .where('secure_id', userSecureId)
         .preload('addresses')
         .preload('roles')
+        .preload('bets')
+      // .preload('bets', (queryBet) => {
+      //   console.log(new Date().toLocaleDateString())
+      //   queryBet.select('created_at').groupBy
+      // })
 
       return response.ok(user)
     } catch (error) {
