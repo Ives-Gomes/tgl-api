@@ -1,8 +1,14 @@
 import { DateTime } from 'luxon'
 import { BaseModel, beforeCreate, column } from '@ioc:Adonis/Lucid/Orm'
 import { v4 as uuidv4 } from 'uuid'
+import { compose } from '@ioc:Adonis/Core/Helpers'
+import { Filterable } from '@ioc:Adonis/Addons/LucidFilter'
 
-export default class Role extends BaseModel {
+import RoleFilter from './Filters/RoleFilter'
+
+export default class Role extends compose(BaseModel, Filterable) {
+  public static $filter = () => RoleFilter
+
   @column({ isPrimary: true })
   public id: number
 
