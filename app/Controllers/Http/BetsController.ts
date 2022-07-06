@@ -7,6 +7,9 @@ import Game from 'App/Models/Game'
 import StoreValidator from 'App/Validators/Bet/StoreValidator'
 import UpdateValidator from 'App/Validators/Bet/UpdateValidator'
 
+import { sendCreatedBetMail } from 'App/Services/sendMail'
+import User from 'App/Models/User'
+
 export default class GamesController {
   public async index({ request, response }: HttpContextContract) {
     const { page, perPage, noPaginate, ...inputs } = request.qs()
@@ -79,6 +82,18 @@ export default class GamesController {
         trx.rollback()
 
         return response.badRequest({ message: 'Error in create bet', originalError: error.message })
+      }
+
+      try {
+        const user = await User.query().where('id', userAuthenticated).firstOrFail()
+
+        await sendCreatedBetMail(user, betCreated, 'email/created_bet')
+      } catch (error) {
+        trx.rollback()
+        return response.badRequest({
+          message: 'Error in send created bet email',
+          originalError: error.message,
+        })
       }
 
       trx.commit()

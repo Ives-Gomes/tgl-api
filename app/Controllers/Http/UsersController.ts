@@ -8,6 +8,8 @@ import Address from 'App/Models/Address'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
 
+import { sendWelcomeMail } from 'App/Services/sendMail'
+
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
     const { page, perPage, noPaginate, ...inputs } = request.qs()
@@ -97,13 +99,14 @@ export default class UsersController {
       })
     }
 
-    let userFind
+    let user
 
     try {
-      userFind = await User.query()
+      user = await User.query()
         .where('id', userCreated.id)
         .preload('roles')
         .preload('addresses')
+        .firstOrFail()
     } catch (error) {
       trx.rollback()
 
@@ -113,9 +116,19 @@ export default class UsersController {
       })
     }
 
+    try {
+      await sendWelcomeMail(user, 'email/welcome')
+    } catch (error) {
+      trx.rollback()
+      return response.badRequest({
+        message: 'Error in send email welcome',
+        originalError: error.message,
+      })
+    }
+
     trx.commit()
 
-    return response.ok(userFind)
+    return response.ok(user)
   }
 
   public async update({ request, response, params }: HttpContextContract) {
