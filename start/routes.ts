@@ -22,6 +22,7 @@ Route.group(() => {
   Route.post('login', 'AuthController.login')
 
   Route.post('users/', 'UsersController.store')
+  Route.post('users/remember-password', 'UsersController.rememberPassword')
 }).prefix('v1/api')
 
 Route.group(() => {

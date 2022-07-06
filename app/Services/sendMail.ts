@@ -32,3 +32,13 @@ export async function sendCreatedBetMail(user: User, bet: Bet, template: string)
       .htmlView(template, { user, bet })
   })
 }
+
+export async function sendRememberPasswordMail(user: User, template: string): Promise<void> {
+  await Mail.send((message) => {
+    message
+      .from('tgl_api@email.com')
+      .to(user.email)
+      .subject('Remember your password!')
+      .htmlView(template, { user })
+  })
+}

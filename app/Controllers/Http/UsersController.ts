@@ -8,7 +8,7 @@ import Address from 'App/Models/Address'
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
 
-import { sendWelcomeMail } from 'App/Services/sendMail'
+import { sendRememberPasswordMail, sendWelcomeMail } from 'App/Services/sendMail'
 
 export default class UsersController {
   public async index({ request, response }: HttpContextContract) {
@@ -210,6 +210,23 @@ export default class UsersController {
       return response.ok({ message: 'User deleted successfully' })
     } catch (error) {
       return response.notFound({ message: 'User not found', originalError: error.message })
+    }
+  }
+
+  public async rememberPassword({ request, response }: HttpContextContract) {
+    const rememberPasswordBody = request.all()
+
+    try {
+      const user = await User.query().where('email', rememberPasswordBody.email).firstOrFail()
+
+      await sendRememberPasswordMail(user, 'email/remember_password')
+
+      return response.ok({ message: 'Remember password mail sended successfully' })
+    } catch (error) {
+      return response.notFound({
+        message: 'Error in send remember password mail',
+        originalError: error.message,
+      })
     }
   }
 }
