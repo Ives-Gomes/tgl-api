@@ -2,6 +2,7 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
 
 import Bet from 'App/Models/Bet'
+import Game from 'App/Models/Game'
 
 import StoreValidator from 'App/Validators/Bet/StoreValidator'
 import UpdateValidator from 'App/Validators/Bet/UpdateValidator'
@@ -46,33 +47,43 @@ export default class GamesController {
       const bodyBet = request.all()
 
       let betCreated
+      let betInfos: any = []
 
       const trx = await Database.beginGlobalTransaction()
 
       try {
-        betCreated = await Bet.create(bodyBet, trx)
+        bodyBet.games.map(async (game) => {
+          // const currentGame = await Game.findByOrFail('id', game.game_id)
+          // const numbers = game.numbers
+
+          // if (
+          //   numbers.length > currentGame.minAndMaxValue ||
+          //   numbers.length < currentGame.minAndMaxValue
+          // ) {
+          //   return response.badRequest({
+          //     message: 'Numbers length is outside of min or max value expected',
+          //   })
+          // }
+
+          const bet = {
+            user_id: userAuthenticated,
+            game_id: game.game_id,
+            chosen_numbers: game.numbers.join(','),
+          }
+
+          betInfos.push(bet)
+        })
+
+        betCreated = await Bet.createMany(betInfos, trx)
       } catch (error) {
         trx.rollback()
 
         return response.badRequest({ message: 'Error in create bet', originalError: error.message })
       }
 
-      let betFind
-
-      try {
-        betFind = await Bet.query().where('id', betCreated.id).preload('user').preload('game')
-      } catch (error) {
-        trx.rollback()
-
-        return response.badRequest({
-          message: 'Error in find bet',
-          originalError: error.message,
-        })
-      }
-
       trx.commit()
 
-      return response.ok(betFind)
+      return response.ok(betCreated)
     } else {
       return response.unauthorized({ message: 'You need to be logged' })
     }

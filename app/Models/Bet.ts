@@ -24,6 +24,9 @@ export default class Bet extends compose(BaseModel, Filterable) {
   @column()
   public gameId: number
 
+  @column()
+  public chosenNumbers: string
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 

@@ -8,7 +8,11 @@ export default class StoreValidator extends MessagesCustom {
   }
 
   public schema = schema.create({
-    user_id: schema.number([rules.exists({ table: 'users', column: 'id' }), rules.unsigned()]),
-    game_id: schema.number([rules.exists({ table: 'games', column: 'id' }), rules.unsigned()]),
+    games: schema.array().members(
+      schema.object().members({
+        game_id: schema.number([rules.exists({ table: 'games', column: 'id' }), rules.unsigned()]),
+        numbers: schema.array().members(schema.number()),
+      })
+    ),
   })
 }
