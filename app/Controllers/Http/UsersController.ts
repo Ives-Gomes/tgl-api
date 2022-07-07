@@ -1,9 +1,14 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Database from '@ioc:Adonis/Lucid/Database'
+import dayjs from 'dayjs'
+import isLeapYear from 'dayjs/plugin/isLeapYear'
+import 'dayjs/locale/pt-br'
 
 import User from 'App/Models/User'
 import Role from 'App/Models/Role'
 import Address from 'App/Models/Address'
+import Bet from 'App/Models/Bet'
 
 import StoreValidator from 'App/Validators/User/StoreValidator'
 import UpdateValidator from 'App/Validators/User/UpdateValidator'
@@ -46,13 +51,31 @@ export default class UsersController {
         .where('secure_id', userSecureId)
         .preload('addresses')
         .preload('roles')
-        .preload('bets')
-      // .preload('bets', (queryBet) => {
-      //   console.log(new Date().toLocaleDateString())
-      //   queryBet.select('created_at').groupBy
-      // })
+        // .preload('bets')
+        .firstOrFail()
 
-      return response.ok(user)
+      // const { bets } = user.serialize()
+      const bets = await Bet.query().where('user_id', user.id)
+
+      let betsInLast1Month: any = []
+
+      bets.map((bet) => {
+        dayjs.extend(isLeapYear)
+        dayjs.locale('pt-br')
+
+        const newDateMoreThan1Month = dayjs(
+          bet.createdAt.toSQL().replace(' ', 'T').replace('.000 ', '')
+        )
+          .add(1, 'M')
+          .format()
+        const currentDate = dayjs().format()
+
+        if (newDateMoreThan1Month >= currentDate) {
+          betsInLast1Month.push(bet)
+        }
+      })
+
+      return response.ok({ user, betsInLast1Month })
     } catch (error) {
       return response.notFound({ message: 'User not found', originalError: error.message })
     }
