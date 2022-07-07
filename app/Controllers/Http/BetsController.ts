@@ -50,32 +50,39 @@ export default class GamesController {
       const bodyBet = request.all()
 
       let betCreated
-      let betInfos: any = []
 
       const trx = await Database.beginGlobalTransaction()
 
       try {
-        bodyBet.games.map(async (game) => {
-          // const currentGame = await Game.findByOrFail('id', game.game_id)
-          // const numbers = game.numbers
+        let betInfos: any = []
 
-          // if (
-          //   numbers.length > currentGame.minAndMaxValue ||
-          //   numbers.length < currentGame.minAndMaxValue
-          // ) {
-          //   return response.badRequest({
-          //     message: 'Numbers length is outside of min or max value expected',
-          //   })
-          // }
+        await Promise.all(
+          bodyBet.games.map(async (game) => {
+            const currentGame = await Game.findByOrFail('id', game.game_id)
+            const numbers = game.numbers
 
-          const bet = {
-            user_id: userAuthenticated,
-            game_id: game.game_id,
-            chosen_numbers: game.numbers.join(','),
-          }
+            if (
+              numbers.length > currentGame.minAndMaxValue ||
+              numbers.length < currentGame.minAndMaxValue
+            ) {
+              throw new Error('Numbers length is outside of min or max value expected')
+            }
 
-          betInfos.push(bet)
-        })
+            numbers.forEach((number) => {
+              if (number > currentGame.range) {
+                throw new Error(`The number ${number} is outside of range`)
+              }
+            })
+
+            const bet = {
+              user_id: userAuthenticated,
+              game_id: game.game_id,
+              chosen_numbers: game.numbers.join(','),
+            }
+
+            betInfos.push(bet)
+          })
+        )
 
         betCreated = await Bet.createMany(betInfos, trx)
       } catch (error) {
