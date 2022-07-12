@@ -65,8 +65,6 @@ test.group('Games index', (group) => {
         name: game.name,
       })
 
-    console.log(response.body())
-
     response.assertStatus(400)
     response.assertBodyContains({
       message: 'Error in update game',
