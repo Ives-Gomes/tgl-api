@@ -51,10 +51,8 @@ export default class UsersController {
         .where('secure_id', userSecureId)
         .preload('addresses')
         .preload('roles')
-        // .preload('bets')
         .firstOrFail()
 
-      // const { bets } = user.serialize()
       const bets = await Bet.query().where('user_id', user.id)
 
       let betsInLast1Month: any = []
