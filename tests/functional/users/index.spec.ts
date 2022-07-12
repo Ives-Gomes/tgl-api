@@ -3,7 +3,7 @@ import Database from '@ioc:Adonis/Lucid/Database'
 
 import { UserFactory } from 'Database/factories/index'
 
-test.group('Users create', (group) => {
+test.group('Users index', (group) => {
   group.each.setup(async () => {
     await Database.beginGlobalTransaction()
     return () => Database.rollbackGlobalTransaction()

@@ -3,6 +3,7 @@ import Factory from '@ioc:Adonis/Lucid/Factory'
 
 import User from 'App/Models/User'
 import Address from 'App/Models/Address'
+import Game from 'App/Models/Game'
 
 export const AddressFactory = Factory.define(Address, ({ faker }) => {
   return {
@@ -26,3 +27,14 @@ export const UserFactory = Factory.define(User, ({ faker }) => {
 })
   .relation('addresses', () => AddressFactory)
   .build()
+
+export const GameFactory = Factory.define(Game, ({ faker }) => {
+  return {
+    name: faker.name.firstName(),
+    description: faker.lorem.lines(),
+    range: Number(faker.random.numeric(2)),
+    price: Number(faker.random.numeric(1)),
+    minAndMaxValue: Number(faker.random.numeric(2)),
+    color: `#${faker.random.numeric(6)}`,
+  }
+}).build()
