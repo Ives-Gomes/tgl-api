@@ -17,8 +17,6 @@ export const AddressFactory = Factory.define(Address, ({ faker }) => {
 }).build()
 
 export const UserFactory = Factory.define(User, ({ faker }) => {
-
-
   return {
     name: faker.name.firstName(),
     cpf: `${faker.random.numeric(3, { allowLeadingZeros: true })}.${faker.random.numeric(3, { allowLeadingZeros: true })}.${faker.random.numeric(3, { allowLeadingZeros: true })}-${faker.random.numeric(2, { allowLeadingZeros: true })}`,
